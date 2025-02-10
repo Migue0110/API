@@ -2,3 +2,7 @@ flask
 flask-restx
 flask-cors
 gunicorn
+pandas
+joblib
+scikit-learn
+gdown
