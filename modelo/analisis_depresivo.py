@@ -8,7 +8,7 @@ class Analizador():
         
     def __init__(self):
         self.__model = None
-        self.modelo_path = "/opt/render/project/src/modelo/training/modelo_random_forest.pkl"
+        self.modelo_path = "modelo/training/modelo_random_forest.pkl"
 
         if not os.path.exists(self.modelo_path):
             print("Descargando modelo...")
