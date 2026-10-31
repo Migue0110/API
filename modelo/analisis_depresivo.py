@@ -1,36 +1,74 @@
-import pandas as pd
-import joblib
+
 import os
-from sklearn.feature_extraction.text import CountVectorizer
+import joblib
 import gdown
 
-class Analizador():
-        
+from pathlib import Path
+from sklearn.feature_extraction.text import CountVectorizer
+
+
+class Analizador:
+
     def __init__(self):
-        self.__model = None
-        self.modelo_path = "modelo/training/modelo_random_forest.pkl"
 
-        if not os.path.exists(self.modelo_path):
+        # Directorio donde se encuentra este archivo
+        self.base_path = Path(__file__).resolve().parent
+
+        # Directorio de archivos entrenados
+        self.training_path = self.base_path / "training"
+
+        self.modelo_path = self.training_path / "modelo_random_forest.pkl"
+        self.vocabulario_path = self.training_path / "vocabulario_countvectorizer.pkl"
+
+        # Crear directorio si no existe
+        self.training_path.mkdir(parents=True, exist_ok=True)
+
+        # Descargar modelo si no existe
+        if not self.modelo_path.exists():
+
             print("Descargando modelo...")
-            gdown.download("https://drive.google.com/uc?id=1Vzhzqb-WqoR3l33Zvy5awwG3LAd-2WVT", self.modelo_path, quiet=False)
-            print("Modelo descargado.")
-                
+
+            gdown.download(
+                id="1Vzhzqb-WqoR3l33Zvy5awwG3LAd-2WVT",
+                output=str(self.modelo_path),
+                quiet=False
+            )
+
+        # Verificar archivos necesarios
+        if not self.modelo_path.exists():
+            raise FileNotFoundError("No se encontró el modelo Random Forest.")
+
+        if not self.vocabulario_path.exists():
+            raise FileNotFoundError(
+                "No se encontró vocabulario_countvectorizer.pkl. "
+                "Debes incluirlo en el repositorio o descargarlo."
+            )
+
+        # Cargar archivos una sola vez
+        print("Cargando modelo y vocabulario...")
+
+        self.__model = joblib.load(self.modelo_path)
+        self.__vocabulario = joblib.load(self.vocabulario_path)
+
+        self.__vectorizer = CountVectorizer(
+            vocabulary=self.__vocabulario
+        )
+
+        print("Analizador cargado correctamente.")
+
     def analizar(self, texto):
-        modelo_path = os.path.join(os.path.dirname(__file__), 'training', 'modelo_random_forest.pkl')
-        vocabulario_path = os.path.join(os.path.dirname(__file__), 'training', 'vocabulario_countvectorizer.pkl')
 
-        modelo_cargado = joblib.load(modelo_path)
-        vocabulario_cargado = joblib.load(vocabulario_path)
+        if not texto or not texto.strip():
+            raise ValueError("El texto no puede estar vacío.")
 
-        if vocabulario_cargado is None:
-            raise ValueError("El vocabulario no se cargó correctamente.")
+        mensaje = self.__vectorizer.transform([texto])
 
-        nuevo_vectorizer = CountVectorizer(vocabulary=vocabulario_cargado)
-        mensaje = nuevo_vectorizer.transform([texto])
-        prediccion = modelo_cargado.predict(mensaje)
+        prediccion = self.__model.predict(mensaje)
 
-        # 🛠 CORRECCIÓN DEL ERROR 🛠
         if prediccion[0] == 1:
             return "Depresivo"
+
         elif prediccion[0] == 0:
             return "No depresivo"
+
+        return "Resultado desconocido"
