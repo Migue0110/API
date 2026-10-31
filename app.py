@@ -41,6 +41,18 @@ class AnalizadorApi(Resource):
             'Sentimiento': analizar.analizar(args['Comentario'])
         }, 200
 
+#if __name__ == '__main__':
+#    import os
+#    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+
+
 if __name__ == '__main__':
     import os
-    app.run(debug=True, host="0.0.0.0", port=int(os.environ.get("PORT", 5000)))
+
+    app.run(
+        debug=False,
+        use_reloader=False,
+        host="0.0.0.0",
+        port=int(os.environ.get("PORT", 5000))
+    )
