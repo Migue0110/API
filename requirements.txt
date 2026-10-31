@@ -1,7 +1,4 @@
-flask
-flask-restx
-flask-cors
-gunicorn
+streamlit
 pandas
 joblib
 scikit-learn
